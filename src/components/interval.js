@@ -18,11 +18,11 @@ class IntervalView extends React.Component {
 }
 
 const enhance = connect(
-  state => ({
-    currentInterval: state.currentInterval
+  (state) => ({
+    currentInterval: state.currentInterval,
   }),
-  dispatch => ({
-    changeInterval: value => dispatch(changeInterval(value))
+  (dispatch) => ({
+    changeInterval: (value) => dispatch(changeInterval(value)),
   })
 );
 

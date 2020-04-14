@@ -10,8 +10,17 @@ class TimerView extends React.Component {
 
     this.state = {
       currentTime: 0,
-      interval: null
+      intervalId: null,
     };
+  }
+
+  componentDidUpdate(prevProps) {
+    const intervalsAreDifferent =
+      prevProps.currentInterval !== this.props.currentInterval;
+
+    if (intervalsAreDifferent && this.state.intervalId) {
+      this.handleStart();
+    }
   }
 
   render() {
@@ -30,27 +39,30 @@ class TimerView extends React.Component {
   handleStart() {
     const { currentInterval } = this.props;
 
+    this.handleStop();
+
     const timer = setInterval(
       () =>
         this.setState(({ currentTime }) => ({
-          currentTime: currentTime + currentInterval
+          currentTime: currentTime + currentInterval,
         })),
       currentInterval * 1000
     );
-    this.setState({ interval: timer });
+    this.setState({ intervalId: timer });
   }
 
   handleStop() {
-    clearInterval(this.state.interval);
-    this.setState({ currentTime: 0 });
+    this.setState((state) => {
+      clearInterval(state.intervalId);
+      return { currentTime: 0, intervalId: null };
+    });
   }
 }
 
-const enhance = connect(
-  state => ({
-    currentInterval: state.currentInterval
-  }),
-  () => null
-);
+const enhance = connect((state) => {
+  return {
+    currentInterval: state.currentInterval,
+  };
+});
 
 export const Timer = enhance(TimerView);

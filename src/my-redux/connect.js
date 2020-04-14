@@ -1,35 +1,25 @@
 import React from "react";
-import PropTypes from "prop-types";
+import { Context } from "./context";
 
-export const connect = (mapStateToProps, mapDispatchToProps) => Component => {
-  class WrappedComponent extends React.Component {
-    constructor() {
-      super();
-      this.handleChange = this.handleChange.bind(this);
-    }
+export const connect = (
+  mapStateToProps = () => null,
+  mapDispatchToProps = () => null
+) => (Wrapped) => {
+  return function (props) {
+    const store = React.useContext(Context);
 
-    componentDidMount() {
-      this.context.store.subscribe(this.handleChange);
-    }
+    const [, forceRender] = React.useReducer((state) => state + 1, 0);
 
-    render() {
-      return (
-        <Component
-          {...this.props}
-          {...mapDispatchToProps(this.context.store.dispatch, this.props)}
-          {...mapStateToProps(this.context.store.getState(), this.props)}
-        />
-      );
-    }
+    React.useEffect(() => {
+      store.subscribe(() => forceRender({}));
+    }, []);
 
-    handleChange() {
-      this.forceUpdate();
-    }
-  }
-
-  WrappedComponent.contextTypes = {
-    store: PropTypes.object
+    return (
+      <Wrapped
+        {...props}
+        {...mapDispatchToProps(store.dispatch, props)}
+        {...mapStateToProps(store.getState(), props)}
+      />
+    );
   };
-
-  return WrappedComponent;
 };
